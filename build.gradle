@@ -1,0 +1,46 @@
+plugins {
+	id 'org.springframework.boot' version '2.3.1.RELEASE'
+	id 'java'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id "com.github.node-gradle.node" version "2.2.4"
+}
+
+group = 'project.school'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	runtimeOnly 'mysql:mysql-connector-java'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+node {
+	version = '12.18.1'
+	npmVersion = '6.9.0'
+	nodeModulesDir = file("./")
+	download = true
+}
+
+task webpack(type: NodeTask, dependsOn: ["npmInstall"]) {
+	script = file('node_modules/webpack-dev-server/bin/webpack-dev-server.js')
+}
+
+task reactBuild(type: NodeTask, dependsOn: ["npmInstall"]) {
+	script = file('node_modules/webpack/bin/webpack.js')
+	args = ["--config", "webpack.prod.js"]
+}
+
+bootJar {
+	launchScript()
+}
+
+tasks.bootJar.dependsOn(reactBuild)
