@@ -2,6 +2,9 @@ package project.school.springreacttemplate.Controllers;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,26 +38,33 @@ public class LoginController {
     private RoleRepository roleRepository;
 
     @PostMapping("/api/register")
-    public void register(@RequestBody RegisterUser registerUser) {
+    public ResponseEntity register(@RequestBody RegisterUser registerUser){
+        if(userRepository.findByUsername(registerUser.getUsername()) != null){
+            return new ResponseEntity(HttpStatus.CONFLICT);
+        }
+
         User user = new User();
         user.setUsername(registerUser.getUsername());
         user.setPassword(passwordEncoder.encode(registerUser.getPassword()));
 
         Set<Role> roles = new HashSet<>();
-        roles.add(roleRepository.findByName(registerUser.getRole()));
+        roles.add(roleRepository.findByName("ROLE_USER"));
         user.setRoles(roles);
 
         userRepository.save(user);
+        return new ResponseEntity((HttpStatus.OK));
     }
 
     @PostMapping("/api/login")
-    public String login(@RequestBody AuthRequest authRequest) throws Exception  {
+    public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) throws Exception  {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         } catch (Exception ex) {
-            throw new Exception("invalid"+" username/password");
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        return jwtUtil.generateToken(authRequest.getUsername());
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Authorization",jwtUtil.generateToken(authRequest.getUsername()));
+        return ResponseEntity.ok().body(jwtUtil.generateToken(authRequest.getUsername()));
     }
 
     @GetMapping("/api/user")

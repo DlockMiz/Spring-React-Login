@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
+import Box from "@material-ui/core/Box";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
+import Alert from "@material-ui/lab/Alert";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Link from "@material-ui/core/Link";
@@ -11,9 +13,37 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import axios from "axios";
 import { styles } from "./styles.js";
 
 class Login extends Component {
+  state = {
+    email: "",
+    password: "",
+    failedLogin: false,
+    loading: false,
+  };
+
+  login = () => {
+    var postData = {
+      username: this.state.email,
+      password: this.state.password,
+    };
+    this.setState({ loading: true });
+    axios
+      .post("/api/login", postData)
+      .then((response) => {
+        console.log(response.data);
+        this.setState({ loading: false });
+      })
+      .catch((error) => {
+        if (error.response.status == 401) {
+          this.setState({ failedLogin: true, loading: false });
+        }
+      });
+  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -27,6 +57,11 @@ class Login extends Component {
             Sign in
           </Typography>
           <form className={classes.form} noValidate>
+            {this.state.failedLogin && (
+              <Grid component={Box} item xs={12}>
+                <Alert severity="error">Incorrect username/password</Alert>
+              </Grid>
+            )}
             <TextField
               variant="outlined"
               margin="normal"
@@ -37,6 +72,7 @@ class Login extends Component {
               name="email"
               autoComplete="email"
               autoFocus
+              onChange={(event) => this.setState({ email: event.target.value })}
             />
             <TextField
               variant="outlined"
@@ -48,18 +84,26 @@ class Login extends Component {
               type="password"
               id="password"
               autoComplete="current-password"
+              onChange={(e) => this.setState({ password: e.target.value })}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
             <Button
-              type="submit"
               fullWidth
               variant="contained"
               color="primary"
+              disabled={this.state.loading}
               className={classes.submit}
+              onClick={this.login}
             >
+              {this.state.loading && (
+                <CircularProgress
+                  size={24}
+                  className={classes.buttonProgress}
+                />
+              )}
               Sign In
             </Button>
             <Grid container>
@@ -69,7 +113,7 @@ class Login extends Component {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/#/register" variant="body2">
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>
