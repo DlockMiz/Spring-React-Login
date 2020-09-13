@@ -34,8 +34,7 @@ class Login extends Component {
     axios
       .post("/api/login", postData)
       .then((response) => {
-        console.log(response.data);
-        this.setState({ loading: false });
+        this.setState({loading: false})
       })
       .catch((error) => {
         if (error.response.status == 401) {

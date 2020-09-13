@@ -2,7 +2,6 @@ package project.school.springreacttemplate.Controllers;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +19,8 @@ import project.school.springreacttemplate.Repositories.RoleRepository;
 import project.school.springreacttemplate.Repositories.UserRepository;
 import project.school.springreacttemplate.Security.Services.JwtUtil;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -56,15 +57,19 @@ public class LoginController {
     }
 
     @PostMapping("/api/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) throws Exception  {
+    public ResponseEntity<String> login(@RequestBody AuthRequest authRequest, HttpServletResponse response) throws Exception  {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         } catch (Exception ex) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("Authorization",jwtUtil.generateToken(authRequest.getUsername()));
-        return ResponseEntity.ok().body(jwtUtil.generateToken(authRequest.getUsername()));
+        Cookie cookie = new Cookie("jwt", jwtUtil.generateToken(authRequest.getUsername()));
+        cookie.setMaxAge(7 * 24 * 60 * 60);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/api/user")

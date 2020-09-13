@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import project.school.springreacttemplate.Security.Filters.JwtFilter;
 import project.school.springreacttemplate.Security.Services.CustomUserDetailsService;
 
@@ -45,7 +46,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().authorizeRequests()
+        http
+            .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .and()
+            .authorizeRequests()
                 .antMatchers("/api/test","/api/login","/api/register","/api/populate","/#/**","/").permitAll()
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
                 .antMatchers("/api/**").hasRole("USER")
@@ -61,6 +65,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web
                 .ignoring()
-                  .antMatchers("/*.js","/css/*.css","/*.ico");
+                  .antMatchers("/*.js","/css/*.css","/*.ico","/*.json");
     }
 }

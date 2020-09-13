@@ -33,6 +33,9 @@ class NavBar extends Component {
             <Button component={Link} to="/register" color="inherit">
               Register
             </Button>
+            <Button component={Link} to="/" color="inherit">
+              Welcome
+            </Button>
           </Toolbar>
         </AppBar>
       </div>
