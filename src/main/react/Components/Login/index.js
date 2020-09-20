@@ -16,6 +16,7 @@ import Container from "@material-ui/core/Container";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import axios from "axios";
 import { styles } from "./styles.js";
+import { withRouter } from "react-router-dom";
 
 class Login extends Component {
   state = {
@@ -34,9 +35,13 @@ class Login extends Component {
     axios
       .post("/api/login", postData)
       .then((response) => {
-        this.setState({loading: false})
+        this.setState({ loading: false });
+        sessionStorage.setItem("authz", response.data[0].name);
+        this.props.changeAuthzRole();
+        this.props.history.push("/");
       })
       .catch((error) => {
+        console.log(error);
         if (error.response.status == 401) {
           this.setState({ failedLogin: true, loading: false });
         }
@@ -123,4 +128,4 @@ class Login extends Component {
     );
   }
 }
-export default withStyles(styles)(Login);
+export default withRouter(withStyles(styles)(Login));

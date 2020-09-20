@@ -1,16 +1,14 @@
 package project.school.springreacttemplate.Controllers;
 
 
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import project.school.springreacttemplate.ApiModels.AccountData.AuthRequest;
 import project.school.springreacttemplate.ApiModels.AccountData.RegisterUser;
 import project.school.springreacttemplate.Entities.Users.Role;
@@ -20,7 +18,10 @@ import project.school.springreacttemplate.Repositories.UserRepository;
 import project.school.springreacttemplate.Security.Services.JwtUtil;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -57,7 +58,7 @@ public class LoginController {
     }
 
     @PostMapping("/api/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequest authRequest, HttpServletResponse response) throws Exception  {
+    public ResponseEntity<Set> login(@RequestBody AuthRequest authRequest, HttpServletResponse response) throws Exception  {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         } catch (Exception ex) {
@@ -69,7 +70,12 @@ public class LoginController {
         cookie.setPath("/");
         response.addCookie(cookie);
 
-        return new ResponseEntity(HttpStatus.OK);
+        return ResponseEntity.ok().body(userRepository.findByUsername(authRequest.getUsername()).getRoles());
+    }
+
+    @GetMapping("/api/getAuthority")
+    public Set<Role> getAuthority(@CookieValue(name="jwt")String jwt){
+        return userRepository.findByUsername(jwtUtil.extractUsername(jwt)).getRoles();
     }
 
     @GetMapping("/api/user")

@@ -1,14 +1,25 @@
-mysql:
-  image: mysql:latest
-  container_name: mysql
-  restart: unless-stopped
-  tty: true
-  ports:
-    - "3306:3306"
-  environment:
-    MYSQL_DATABASE: template_db
-    MYSQL_USER: user
-    MYSQL_PASSWORD: secret
-    MYSQL_ROOT_PASSWORD: secret
-    SERVICE_TAGS: dev
-    SERVICE_NAME: mysql
+version: "3.8"
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: template_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+  prod:
+    image: prod
+    container_name: prod
+    tty: true
+    working_dir: "/home"
+    ports:
+      - 8090:8080
+    command: ['java','-jar','app.jar', '--spring.profiles.active=prod']
+
