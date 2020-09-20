@@ -14,12 +14,4 @@ services:
       MYSQL_ROOT_PASSWORD: secret
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
-  prod:
-    image: prod
-    container_name: prod
-    tty: true
-    working_dir: "/home"
-    ports:
-      - 8090:8080
-    command: ['java','-jar','app.jar', '--spring.profiles.active=prod']
 

@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+
+/** Custom user service that is used on authentication for most http requests.*/
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
@@ -27,12 +29,14 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Could not find user");
         }
 
+        /** This block finds the roles assigned to the user, and */
         Set<Role> roles = user.getRoles();
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
         for (Role role : roles) {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
+
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
     }
 }

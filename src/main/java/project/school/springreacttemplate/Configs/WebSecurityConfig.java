@@ -18,6 +18,8 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import project.school.springreacttemplate.Security.Filters.JwtFilter;
 import project.school.springreacttemplate.Security.Services.CustomUserDetailsService;
 
+
+/** This class is intended to create a spring security configuration. */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -28,11 +30,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtFilter jwtFilter;
 
+    /** Overriding the default configure function to implement the a custom user authentication. */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService);
     }
 
+    /** Create a new password encoder bean to be used during the implementation of the authenticating the user.  */
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -44,6 +48,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+    /** This is where the magic happens, here we override spring security rest protocol. CSRF token is being generated for
+     * the frontend. Routes under authorizeRequests have specific parameters in order to be hit. Nearly every /api/ call
+     * requires a jwt in the header in order to authenticate the user.
+     *
+     * At the bottom we are adding a custom JWT filter that is used to decrypt the token. This is done before anything else
+     * hence addFilterBefore.*/
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -61,6 +71,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
+
+    /** This will ignore any requests with these routes, normaly used for javascript and css file types. */
     @Override
     public void configure(WebSecurity web) throws Exception {
         web

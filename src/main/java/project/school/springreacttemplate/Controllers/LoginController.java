@@ -39,16 +39,22 @@ public class LoginController {
     @Autowired
     private RoleRepository roleRepository;
 
+
+    /** POST Request that will take register a user into the database, and automatically assign base roles. */
     @PostMapping("/api/register")
     public ResponseEntity register(@RequestBody RegisterUser registerUser){
+
+        /** Checks if the username is already taken and returns an error if so. */
         if(userRepository.findByUsername(registerUser.getUsername()) != null){
             return new ResponseEntity(HttpStatus.CONFLICT);
         }
 
+        /** Creates a new user entity and encodes the password.*/
         User user = new User();
         user.setUsername(registerUser.getUsername());
         user.setPassword(passwordEncoder.encode(registerUser.getPassword()));
 
+        /** Set basic role of user for every new registered user. */
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepository.findByName("ROLE_USER"));
         user.setRoles(roles);
@@ -57,13 +63,16 @@ public class LoginController {
         return new ResponseEntity((HttpStatus.OK));
     }
 
+    /** POST Request that will check user credentials and returns a JWT as a cookie. */
     @PostMapping("/api/login")
     public ResponseEntity<Set> login(@RequestBody AuthRequest authRequest, HttpServletResponse response) throws Exception  {
+        /** Try's to authenticate the user and will return a 401 if failed  */
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
         } catch (Exception ex) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
+        /** Creates a cookie with the json web token */
         Cookie cookie = new Cookie("jwt", jwtUtil.generateToken(authRequest.getUsername()));
         cookie.setMaxAge(7 * 24 * 60 * 60);
         cookie.setSecure(true);
@@ -78,6 +87,7 @@ public class LoginController {
         return userRepository.findByUsername(jwtUtil.extractUsername(jwt)).getRoles();
     }
 
+    /** These api calls are to test authentication.*/
     @GetMapping("/api/user")
     public String user(){
         return "This request is a successfully authenticated call with a JWT and User role.";

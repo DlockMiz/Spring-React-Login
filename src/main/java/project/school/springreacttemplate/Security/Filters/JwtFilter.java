@@ -24,6 +24,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private CustomUserDetailsService service;
 
+    /** This is the filter that every request goes through for authentication, . */
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
 
@@ -40,6 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             UserDetails userDetails = service.loadUserByUsername(userName);
 
+            /** Use the JWT service class to validate the token and get serverside authorities.*/
             if (jwtUtil.validateToken(token, userDetails)) {
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =

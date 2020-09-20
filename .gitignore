@@ -32,3 +32,4 @@ out/
 .vscode/
 .vs/
 /node_modules/
+/sql_proxy_docker
